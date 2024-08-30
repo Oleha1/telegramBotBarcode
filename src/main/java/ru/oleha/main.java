@@ -140,13 +140,13 @@ public class main extends Application implements NativeKeyListener {
         int bS = buyStatus();
         while (bS == 0) {
             Thread.sleep(10);
-            if (sleepCounter > 25) {
+            if (sleepCounter > 50) {
                 break;
             }
             bS = buyStatus();
             sleepCounter++;
         }
-        if (sleepCounter > 25) {
+        if (sleepCounter > 50) {
             sleepCounter = 0;
             return;
         }
@@ -167,8 +167,8 @@ public class main extends Application implements NativeKeyListener {
                 Logs.log("Вы не смогли купить из-за не хватки денег", itemInfo);
             }
         }
-        closeGui();
         sleepCounter = 0;
+        closeGui();
         updateScreen();
         while (Utils.isSameScreen()) {
             Thread.sleep(25);
