@@ -61,6 +61,17 @@ public class ConfigBuyItems {
 //        }
 //        write(buyItemsMap);
 //    }
+    public static String getConfig() {
+        String result = "";
+        try (Reader reader = new FileReader(file)) {
+            Gson gson = new Gson();
+            Type mapType = new TypeToken<ArrayList<BuyItems>>() {}.getType();
+            result = gson.fromJson(reader, mapType).toString();
+        } catch (IOException e) {
+            System.err.println("Ошибка чтения файла JSON: " + e.getMessage());
+        }
+        return result;
+    }
     private static ArrayList<BuyItems> read() {
         ArrayList<BuyItems> craftDataMap = new ArrayList<>();
         try (Reader reader = new FileReader(file)) {

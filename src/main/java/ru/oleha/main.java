@@ -1,5 +1,6 @@
 package ru.oleha;
 
+import okhttp3.*;
 import com.github.kwhat.jnativehook.GlobalScreen;
 import com.github.kwhat.jnativehook.NativeHookException;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
@@ -302,9 +303,39 @@ public class main extends Application implements NativeKeyListener {
         debugButton.setText("Debug");
         debugButton.setOnAction(event -> {
             try {
-//                ThreadCreateImg createImg = new ThreadCreateImg(0,0);
-//                createImg.start();
                 debug();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        Button sendConfigButton = new Button();
+        sendConfigButton.setText("send cfg");
+        sendConfigButton.setOnAction(event -> {
+            try {
+                OkHttpClient client = new OkHttpClient();
+
+                File file = new File("./buyItems.json");
+                RequestBody fileBody = RequestBody.create(file, MediaType.parse("text/plain"));
+                MultipartBody requestBody = new MultipartBody.Builder()
+                        .setType(MultipartBody.FORM)
+                        .addFormDataPart("content", "Конфиг")
+                        .addFormDataPart("file", file.getName(), fileBody)
+                        .build();
+
+                Request request = new Request.Builder()
+                        .url(webHook)
+                        .post(requestBody)
+                        .build();
+
+                try (Response response = client.newCall(request).execute()) {
+                    if (response.isSuccessful()) {
+                        System.out.println("Файл успешно отправлен!");
+                    } else {
+                        System.out.println("Ошибка: " + response.code());
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
@@ -316,7 +347,7 @@ public class main extends Application implements NativeKeyListener {
         VBox vText = new VBox(10);
         logs.selectedProperty().addListener((observable, oldValue, newValue) -> ConfigSettings.setLogs(newValue));
         loop.selectedProperty().addListener((observable, oldValue, newValue) -> ConfigSettings.setLoop(newValue));
-        vBoxButton.getChildren().addAll(start,debugButton);
+        vBoxButton.getChildren().addAll(start,debugButton,sendConfigButton);
         vBinding.getChildren().addAll(startBuy,exit, size);
         vCheckBox.getChildren().addAll(loop,logs,debug);
         vText.getChildren().addAll(timeScan,timeFindItem);
@@ -325,7 +356,7 @@ public class main extends Application implements NativeKeyListener {
         stage.setScene(scene);
         stage.setTitle("Minecraft 1.7.10");
         stage.setWidth(390);
-        stage.setHeight(110);
+        stage.setHeight(135);
         stage.show();
         stage.setOnCloseRequest(new EventHandler() {
             @Override
