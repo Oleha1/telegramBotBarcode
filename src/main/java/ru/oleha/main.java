@@ -35,6 +35,7 @@ import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
 
 public class main extends Application implements NativeKeyListener {
+    public static ThreadStart threadStart;
     static final String webHook = "https://discord.com/api/webhooks/1278978943957078026/OoGscpezIn1BTFaIL_RJ2jRjgYCuQ-IO7q411PwHelNwRC3kPcGnXTdb0wjg_WoUMSpA";
     static final DateTimeFormatter DAYS = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
@@ -286,14 +287,20 @@ public class main extends Application implements NativeKeyListener {
 
     @Override
     public void start(Stage stage) {
-        Label startBuy = new Label("Start buy `" + NativeKeyEvent.getKeyText(ConfigSettings.getKeyIDStart())+"`");
+        Label startBuy = new Label("Start/Stop buy `" + NativeKeyEvent.getKeyText(ConfigSettings.getKeyIDStart())+"`");
         Label exit = new Label("Exit `" + NativeKeyEvent.getKeyText(ConfigSettings.getKeyIDExit())+"`");
         Label size = new Label("Item size " + ConfigBuyItems.size());
         Button start = new Button();
         start.setText("Start");
         start.setOnAction(event -> {
             try {
-                start();
+                if (main.threadStart == null || !main.threadStart.isAlive()) {
+                    main.threadStart = new ThreadStart();
+                    main.threadStart.start();
+                } else {
+                    main.threadStart.stopRunning();
+                    main.threadStart = null;
+                }
             } catch (Exception e) {
                 e.fillInStackTrace();
                 throw new RuntimeException(e);
@@ -309,7 +316,7 @@ public class main extends Application implements NativeKeyListener {
             }
         });
         Button sendConfigButton = new Button();
-        sendConfigButton.setText("send cfg");
+        sendConfigButton.setText("Send cfg");
         sendConfigButton.setOnAction(event -> {
             try {
                 OkHttpClient client = new OkHttpClient();

@@ -6,6 +6,7 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 import ru.oleha.api.DiscordWebhook;
 import ru.oleha.configs.ConfigSettings;
+import ru.oleha.thread.ThreadStart;
 
 import java.awt.*;
 import java.io.IOException;
@@ -18,7 +19,13 @@ public class KeyHandler implements NativeKeyListener {
     public void nativeKeyPressed(NativeKeyEvent e) {
         if (e.getKeyCode() == ConfigSettings.getKeyIDStart()) {
             try {
-                main.loop.setSelected(!main.loop.isSelected());
+                if (main.threadStart == null || !main.threadStart.isAlive()) {
+                    main.threadStart = new ThreadStart();
+                    main.threadStart.start();
+                } else {
+                    main.threadStart.stopRunning();
+                    main.threadStart = null;
+                }
             } catch (Exception ex) {
                 throw new RuntimeException(ex);
             }
