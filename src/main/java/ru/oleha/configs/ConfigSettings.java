@@ -3,8 +3,8 @@ package ru.oleha.configs;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
-import ru.oleha.utils.Storage;
 import ru.oleha.utils.Settings;
+import ru.oleha.utils.Storage;
 
 import java.io.*;
 import java.lang.reflect.Type;

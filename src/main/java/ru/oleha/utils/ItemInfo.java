@@ -1,7 +1,6 @@
 package ru.oleha.utils;
 
 import java.awt.image.BufferedImage;
-import java.util.Objects;
 
 public class ItemInfo {
     private final String name;

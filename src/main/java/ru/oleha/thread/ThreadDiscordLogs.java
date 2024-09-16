@@ -1,13 +1,9 @@
 package ru.oleha.thread;
 
 import ru.oleha.api.DiscordWebhook;
-import ru.oleha.main;
 import ru.oleha.utils.ItemInfo;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
-import java.awt.image.BufferedImage;
-import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 

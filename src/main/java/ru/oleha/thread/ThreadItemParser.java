@@ -4,15 +4,9 @@ import net.sourceforge.tess4j.Tesseract;
 import ru.oleha.main;
 import ru.oleha.utils.ItemInfo;
 import ru.oleha.utils.Utils;
-import sun.awt.Mutex;
 
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 public class ThreadItemParser extends Thread {

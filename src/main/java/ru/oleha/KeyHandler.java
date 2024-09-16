@@ -10,7 +10,6 @@ import ru.oleha.thread.ThreadStart;
 
 import java.awt.*;
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 public class KeyHandler implements NativeKeyListener {
@@ -32,13 +31,7 @@ public class KeyHandler implements NativeKeyListener {
         }
         if (e.getKeyCode() == ConfigSettings.getKeyIDExit()) {
             try {
-                DiscordWebhook.EmbedObject embedObject = new DiscordWebhook.EmbedObject();
-                embedObject.setTitle("Бот для покупки предметов был закрыт");
-                embedObject.setColor(new Color(0xFF0000));
-                String daysAndTime = String.format("[%s : %s]", LocalDateTime.now().format(DAYS),LocalDateTime.now().format(TIME));
-                embedObject.addField("Время: " + daysAndTime,"",false);
-                DiscordWebhook discordWebhook = new DiscordWebhook("https://discord.com/api/webhooks/1278978943957078026/OoGscpezIn1BTFaIL_RJ2jRjgYCuQ-IO7q411PwHelNwRC3kPcGnXTdb0wjg_WoUMSpA");
-                discordWebhook.addEmbed(embedObject);
+                DiscordWebhook discordWebhook = main.setupDiscordWebhook("Бот для покупки предметов был закрыт",new Color(0x00FFFF));
                 discordWebhook.execute();
                 GlobalScreen.removeNativeKeyListener(new KeyHandler());
                 GlobalScreen.unregisterNativeHook();
@@ -47,20 +40,5 @@ public class KeyHandler implements NativeKeyListener {
             }
             System.exit(0);
         }
-//        if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
-//            try {
-//                GlobalScreen.unregisterNativeHook();
-//            } catch (NativeHookException nativeHookException) {
-//                nativeHookException.printStackTrace();
-//            }
-//        }
     }
-
-//    public void nativeKeyReleased(NativeKeyEvent e) {
-//        System.out.println("nativeKeyReleased Key Released: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
-//    }
-//
-//    public void nativeKeyTyped(NativeKeyEvent e) {
-//        System.out.println("nativeKeyTyped Key Typed: " + e.getKeyText(e.getKeyCode()));
-//    }
 }
