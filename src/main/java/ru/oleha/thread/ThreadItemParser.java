@@ -11,7 +11,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class ThreadItemParser extends Thread {
     private final CountDownLatch countDownLatch;
-    private BufferedImage image;
+    private final BufferedImage image;
 
     public ThreadItemParser(CountDownLatch countDownLatch,BufferedImage image) {
         this.countDownLatch = countDownLatch;
@@ -26,7 +26,6 @@ public class ThreadItemParser extends Thread {
             Tesseract tesseractItemPrice = new Tesseract();
             tesseractItemStack.setDatapath("./tessdata");
             tesseractItemStack.setLanguage("rusb");
-//            tesseractItemStack.setLanguage("engb");
             tesseractItemName.setDatapath("./tessdata");
             tesseractItemName.setLanguage("rusf");
             tesseractItemPrice.setDatapath("./tessdata");
@@ -37,7 +36,6 @@ public class ThreadItemParser extends Thread {
             int itemStack = Utils.getStack(tesseractItemStack.doOCR(imgItemStack));
             String itemName = tesseractItemName.doOCR(imgItemName);
             int itemPrice = Utils.getPrice(tesseractItemPrice.doOCR(imgItemPrice));
-//            ImageIO.write(imgItemStack,"png", new File("./"+itemPrice+ ".png"));
             Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
             int x = (int)(screen.getWidth() / 2) - imgItemPrice.getTileGridXOffset();
             int y = (int)(screen.getHeight() / 2) - imgItemPrice.getTileGridYOffset();

@@ -49,10 +49,10 @@ public class main extends Application implements NativeKeyListener {
     static int sleepCounter = 0;
     public static  CheckBox loop = new CheckBox("Loop");
     static CheckBox logs = new CheckBox("Logs");
-    static CheckBox debug = new CheckBox("Debug");
     static Label timeScan = new Label("Time item scan: 0");
     static Label timeFindItem = new Label("Time find item: 0");
     public static Tesseract tesseractItemName = new Tesseract();
+    public static Tesseract tesseractConnection = new Tesseract();
     public static Tesseract tesseractFirstItemPrice = new Tesseract();
     public static Tesseract tesseractLastItemPrice = new Tesseract();
     public static Collection<ItemInfo> itemInfos = Collections.synchronizedCollection(new ArrayList<>());
@@ -72,6 +72,8 @@ public class main extends Application implements NativeKeyListener {
         tesseractFirstItemPrice.setLanguage("rusf");
         tesseractLastItemPrice.setDatapath("./tessdata");
         tesseractLastItemPrice.setLanguage("rusf");
+        tesseractConnection.setDatapath("./tessdata");
+        tesseractConnection.setLanguage("rusb+engb");
         ConfigBuyItems.init();
         ConfigSettings.init();
         loop.setSelected(ConfigSettings.isLoop());
@@ -95,8 +97,9 @@ public class main extends Application implements NativeKeyListener {
         return 0;
     }
     private static void buyItem(int x,int y, ItemInfo itemInfo) throws Exception {
+        sleepCounter = 0;
         itemInfos.clear();
-        if (!confirmBuyItem(x, y, itemInfo)) {
+        if (confirmBuyItem(x, y, itemInfo)) {
             return;
         }
         ClickMouse(x,y,true);
@@ -105,31 +108,27 @@ public class main extends Application implements NativeKeyListener {
             ThreadCreateImg createImg = new ThreadCreateImg(x,y - 18);
             createImg.start();
         }
-        boolean isActive = isButtonActive(x,y + 18);
+        boolean isActive = isButtonBuyItemActive(x,y + 18);
         while (!isActive) {
             Thread.sleep(10);
-            if (sleepCounter > 25) {
-                break;
+            if (sleepCounter > 100) {
+                return;
             }
-            isActive = isButtonActive(x,y + 18);
+            isActive = isButtonBuyItemActive(x,y + 18);
             sleepCounter++;
         }
-        if (!confirmBuyItem(x, y, itemInfo)) {
+        if (confirmBuyItem(x, y, itemInfo)) {
             return;
         }
         ClickMouse(x, y + 28,true);
         int bS = getBuyStatus();
         while (bS == 0) {
             Thread.sleep(10);
-            if (sleepCounter > 50) {
-                break;
+            if (sleepCounter > 100) {
+                return;
             }
             bS = getBuyStatus();
             sleepCounter++;
-        }
-        if (sleepCounter > 50) {
-            sleepCounter = 0;
-            return;
         }
         if (logs.isSelected()) {
             if (bS == 1) {
@@ -148,13 +147,7 @@ public class main extends Application implements NativeKeyListener {
                 Logs.log("Вы не смогли купить из-за не хватки денег", itemInfo);
             }
         }
-        sleepCounter = 0;
         closeGui();
-        updateScreen();
-        while (Utils.isSameScreen()) {
-            Thread.sleep(25);
-            updateScreen();
-        }
     }
 
     public static void debugProgramTime() throws Exception {
@@ -163,6 +156,19 @@ public class main extends Application implements NativeKeyListener {
         ClickMouse((int) (screen.getWidth() / 4), (int) (screen.getHeight() / 2),true);
         long timeNew;
         long time;
+        if (!Utils.isGuiOpen()) {
+            if (Utils.isSocketException()) {
+                closeGui();
+                Thread.sleep(500);
+                ClickMouse(900,900,true);
+            }
+            boolean isInGame = Utils.isInGame();
+            while (!isInGame) {
+                Thread.sleep(10);
+                isInGame = Utils.isInGame();
+            }
+            openAuction();
+        }
         try {
             time = System.currentTimeMillis();
             BufferedImage image = new Robot().createScreenCapture(new Rectangle(889,405,494,370));
@@ -194,10 +200,10 @@ public class main extends Application implements NativeKeyListener {
             timeNew = System.currentTimeMillis();
             timeFindItem.setText("Time find item: " + (timeNew - time));
             Thread.sleep(500);
-            updateScreen();
+            clickSearch();
             while (Utils.isSameScreen()) {
                 Thread.sleep(25);
-                updateScreen();
+                clickSearch();
             }
         } catch (TesseractException e) {
             e.printStackTrace();
@@ -218,51 +224,62 @@ public class main extends Application implements NativeKeyListener {
     }
 
     public static void start() throws Exception {
-        do {
-            itemInfos.clear();
-            Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
-            ClickMouse((int) (screen.getWidth() / 4), (int) (screen.getHeight() / 2),true);
-            try {
-                BufferedImage image = new Robot().createScreenCapture(new Rectangle(889,405,494,370));
-                int y = 0;
-                CountDownLatch countDownLatch = new CountDownLatch(9);
-                for (int i = 0; i < 9; i++) {
-                    ThreadItemParser threadItemParser = new ThreadItemParser(countDownLatch,image.getSubimage(0,y,494,37));
-                    threadItemParser.start();
-                    y += 37;
-                }
-                countDownLatch.await();
-                ArrayList<BuyItems> buyItemsArrayList = Storage.getBuyItems();
+        itemInfos.clear();
+        Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+        ClickMouse((int) (screen.getWidth() / 4), (int) (screen.getHeight() / 2), true);
+        if (!Utils.isGuiOpen()) {
+            if (Utils.isSocketException()) {
+                closeGui();
+                Thread.sleep(500);
+                ClickMouse(900,900,true);
+            }
+            boolean isInGame = Utils.isInGame();
+            while (!isInGame) {
+                Thread.sleep(10);
+                isInGame = Utils.isInGame();
+            }
+            openAuction();
+        }
+        try {
+            BufferedImage image = Utils.robot.createScreenCapture(new Rectangle(889, 405, 494, 370));
+            int y = 0;
+            CountDownLatch countDownLatch = new CountDownLatch(9);
+            for (int i = 0; i < 9; i++) {
+                ThreadItemParser threadItemParser = new ThreadItemParser(countDownLatch, image.getSubimage(0, y, 494, 37));
+                threadItemParser.start();
+                y += 37;
+            }
+            countDownLatch.await();
+            ArrayList<BuyItems> buyItemsArrayList = Storage.getBuyItems();
 //                ItemInfo itemInfoBest = null;
 //                int bestPrice = 0;
-                mark:
-                for (ItemInfo itemInfo : itemInfos) {
-                    for (BuyItems buyItems : buyItemsArrayList) {
-                        if (itemInfo.getName().contains(buyItems.getItemName())) {
-                            if (itemInfo.getPrice() > 0 && itemInfo.getStack() >= buyItems.getMinStack()) {
-                                if (itemInfo.getPrice() <= (buyItems.getMinPrice() * itemInfo.getStack())) {
+            mark:
+            for (ItemInfo itemInfo : itemInfos) {
+                for (BuyItems buyItems : buyItemsArrayList) {
+                    if (itemInfo.getName().contains(buyItems.getItemName())) {
+                        if (itemInfo.getPrice() > 0 && itemInfo.getStack() >= buyItems.getMinStack()) {
+                            if (itemInfo.getPrice() <= (buyItems.getMinPrice() * itemInfo.getStack())) {
 //                                    int prePrice = (buyItems.getMinPrice() * itemInfo.getStack()) - itemInfo.getPrice();
 //                                    if (itemInfoBest == null || itemInfo.getPrice() - prePrice) {
 //                                        bestPrice = prePrice;
 //                                    }
-                                    buyItem(itemInfo.getX(), itemInfo.getY(), itemInfo);
-                                    itemInfos.clear();
-                                    break mark;
-                                }
+                                buyItem(itemInfo.getX(), itemInfo.getY(), itemInfo);
+                                itemInfos.clear();
+                                break mark;
                             }
                         }
                     }
                 }
-                Thread.sleep(500);
-                updateScreen();
-                while (Utils.isSameScreen()) {
-                    Thread.sleep(25);
-                    updateScreen();
-                }
-            } catch (TesseractException e) {
-                e.printStackTrace();
             }
-        } while (loop.isSelected());
+            Thread.sleep(500);
+            clickSearch();
+            while (Utils.isSameScreen()) {
+                Thread.sleep(25);
+                clickSearch();
+            }
+        } catch (TesseractException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -372,51 +389,57 @@ public class main extends Application implements NativeKeyListener {
 
     public static void ClickMouse(int x,int y,boolean b) {
         try {
-            Robot robot = new Robot();
-            robot.mouseMove(x, y);
+            Utils.robot.mouseMove(x, y);
             if (b) {
                 Thread.sleep(45);
-                robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+                Utils.robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
                 Thread.sleep(125);
-                robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
+                Utils.robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
             }
-        } catch (AWTException e) {
-            e.printStackTrace();
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
     }
-    public static void updateScreen() {
+    public static void clickSearch() {
         Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
         ClickMouse((int)(dimension.getWidth() / 2) + 380, (int)(dimension.getHeight()/ 2) - 185,true);
     }
-    public static boolean confirmBuyItem(int x, int y, ItemInfo itemInfo) throws Exception {
+    public static boolean confirmBuyItem(int x, int y, ItemInfo itemInfo) {
         BufferedImage originalImage = itemInfo.getImage();
         originalImage = originalImage.getSubimage(0,0,originalImage.getWidth(),18);
-        BufferedImage image = new Robot().createScreenCapture(new Rectangle(x - 431,y - 25,494,18));
+        BufferedImage image = Utils.robot.createScreenCapture(new Rectangle(x - 431,y - 25,494,18));
         for (int pX = 0; pX < originalImage.getWidth(); pX++) {
             for (int pY = 0; pY < originalImage.getHeight(); pY++) {
                 if (originalImage.getRGB(pX,pY) != image.getRGB(pX,pY)) {
-                    return false;
+                    return true;
                 }
             }
         }
-        return true;
+        return false;
     }
-    public static boolean isButtonActive(int x,int y) throws Exception {
-        BufferedImage image = new Robot().createScreenCapture(new Rectangle(x,y,1,1));
+    public static boolean isButtonBuyItemActive(int x, int y) {
+        BufferedImage image = Utils.robot.createScreenCapture(new Rectangle(x,y,1,1));
         Color color = new Color(37,40,37);
         Color colorImage = new Color(image.getRGB(0,0),false);
         return colorImage.equals(color);
     }
     public static void closeGui() {
         try {
-            Robot robot = new Robot();
-            robot.keyPress(27);
+            Utils.robot.keyPress(27);
             Thread.sleep(250);
-            robot.keyRelease(27);
-        } catch (AWTException e) {
-            e.printStackTrace();
+            Utils.robot.keyRelease(27);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    public static void openAuction() {
+        try {
+            Utils.robot.keyPress(80);
+            Thread.sleep(250);
+            Utils.robot.keyRelease(80);
+            ClickMouse(550,430,true);
+            Thread.sleep(200);
+            ClickMouse(1050,390,true);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }

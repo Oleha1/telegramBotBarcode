@@ -9,7 +9,7 @@ public class Utils {
     private static int preFirstPrise = 0;
     private static int preLastPrise = 0;
     private static final Color black = new Color(0x000000);
-    private static final Robot robot;
+    public static final Robot robot;
 
     static {
         try {
@@ -59,6 +59,19 @@ public class Utils {
         int green = color.getGreen();
         int blue = color.getBlue();
         return red > 195 && green > 195 && blue > 195;
+    }
+    public static boolean isGuiOpen() {
+        BufferedImage image = Utils.robot.createScreenCapture(new Rectangle(566,267,1,1));
+        return image.getRGB(0, 0) == -14396823;
+    }
+    public static boolean isInGame() {
+        BufferedImage image = Utils.robot.createScreenCapture(new Rectangle(1646,957,1,1));
+        return image.getRGB(0,0) != -3328461;
+    }
+    public static boolean isSocketException() throws Exception {
+        BufferedImage image = Utils.white(Utils.robot.createScreenCapture(new Rectangle(680,975,575,30)));
+        String string = main.tesseractConnection.doOCR(image).replace("\n","");
+        return string.equals("Соединение потеряно: Socket exception");
     }
     public static BufferedImage white(BufferedImage image) {
         BufferedImage result = new BufferedImage(image.getWidth(),image.getHeight(),BufferedImage.TYPE_INT_RGB);

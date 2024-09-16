@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
 public class KeyHandler implements NativeKeyListener {
-    static final DateTimeFormatter DAYS = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
     public void nativeKeyPressed(NativeKeyEvent e) {
         if (e.getKeyCode() == ConfigSettings.getKeyIDStart()) {
             try {
