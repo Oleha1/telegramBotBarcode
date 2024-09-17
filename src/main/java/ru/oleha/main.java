@@ -34,16 +34,19 @@ import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.CountDownLatch;
+import java.util.stream.Stream;
 
 public class main extends Application implements NativeKeyListener {
     public static ThreadStart threadStart;
-    static final String webHook = "https://discord.com/api/webhooks/1278978943957078026/OoGscpezIn1BTFaIL_RJ2jRjgYCuQ-IO7q411PwHelNwRC3kPcGnXTdb0wjg_WoUMSpA";
     static final DateTimeFormatter DAYS = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     static final DateTimeFormatter TIME = DateTimeFormatter.ofPattern("HH:mm:ss");
     static int sleepCounter = 0;
@@ -229,6 +232,8 @@ public class main extends Application implements NativeKeyListener {
         ClickMouse((int) (screen.getWidth() / 4), (int) (screen.getHeight() / 2), true);
         if (!Utils.isGuiOpen()) {
             if (Utils.isSocketException()) {
+                DiscordWebhook discordWebhook = setupDiscordWebhook("Бот поймал Socket Exception и закрыл его!",new Color(0xFF00FF));
+                discordWebhook.execute();
                 closeGui();
                 Thread.sleep(500);
                 ClickMouse(900,900,true);
@@ -313,7 +318,7 @@ public class main extends Application implements NativeKeyListener {
             }
         });
         Button testTime = new Button();
-        testTime.setText("Test Time");
+        testTime.setText("Test time");
         testTime.setOnAction(event -> {
             try {
                 debugProgramTime();
@@ -336,7 +341,7 @@ public class main extends Application implements NativeKeyListener {
                         .build();
 
                 Request request = new Request.Builder()
-                        .url(webHook)
+                        .url(Storage.webHookConfig)
                         .post(requestBody)
                         .build();
 
@@ -353,24 +358,52 @@ public class main extends Application implements NativeKeyListener {
                 throw new RuntimeException(e);
             }
         });
+        Button clearLogs = new Button();
+        clearLogs.setText("Clear logs");
+        clearLogs.setOnAction(event -> {
+            try {
+                Path path = Paths.get("./logs.json");
+                Files.write(path,new byte[0]);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
+        Button clearImg = new Button();
+        clearImg.setText("Clear img");
+        clearImg.setOnAction(event -> {
+            Path path = Paths.get("./imgs");
+            try (Stream<Path> files = Files.list(path)) {
+                files.forEach(file -> {
+                    try {
+                        Files.delete(file);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
         HBox hBox = new HBox(10);
         VBox vBoxButton = new VBox(10);
+        VBox vBoxButton2 = new VBox(10);
         VBox vBinding = new VBox(10);
         VBox vCheckBox = new VBox(10);
         VBox vText = new VBox(10);
         logs.selectedProperty().addListener((observable, oldValue, newValue) -> ConfigSettings.setLogs(newValue));
         loop.selectedProperty().addListener((observable, oldValue, newValue) -> ConfigSettings.setLoop(newValue));
-        vBoxButton.getChildren().addAll(start,debugButton,testTime, sendConfigButton);
+        vBoxButton.getChildren().addAll(start,debugButton,testTime);
+        vBoxButton2.getChildren().addAll(sendConfigButton,clearLogs,clearImg);
         vBinding.getChildren().addAll(startBuy,exit, size);
         vCheckBox.getChildren().addAll(loop,logs);
         vText.getChildren().addAll(timeScan,timeFindItem);
-        hBox.getChildren().addAll(vBoxButton,vBinding, vCheckBox,vText);
+        hBox.getChildren().addAll(vBoxButton, vBoxButton2, vBinding, vCheckBox, vText);
         Scene scene = new Scene(hBox, 500, 500);
 //        scene.getStylesheets().add("https://raw.githubusercontent.com/antoniopelusi/JavaFX-Dark-Theme/main/style.css");
         stage.setScene(scene);
         stage.setTitle("Minecraft 1.7.10");
-        stage.setWidth(400);
-        stage.setHeight(170);
+        stage.setWidth(500);
+        stage.setHeight(135);
         stage.show();
         stage.setOnCloseRequest(new EventHandler() {
             @Override
@@ -393,7 +426,7 @@ public class main extends Application implements NativeKeyListener {
             if (b) {
                 Thread.sleep(45);
                 Utils.robot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
-                Thread.sleep(125);
+                Thread.sleep(75);
                 Utils.robot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
             }
         } catch (InterruptedException e) {
@@ -451,7 +484,7 @@ public class main extends Application implements NativeKeyListener {
         String timestamp = String.format("[%s : %s]", LocalDateTime.now().format(DAYS),LocalDateTime.now().format(TIME));
         embedObject.addField("Время: " + timestamp, "", false);
 
-        DiscordWebhook discordWebhook = new DiscordWebhook(webHook);
+        DiscordWebhook discordWebhook = new DiscordWebhook(Storage.webHookLogs);
         discordWebhook.addEmbed(embedObject);
         return discordWebhook;
     }
