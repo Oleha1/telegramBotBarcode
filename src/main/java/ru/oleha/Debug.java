@@ -15,7 +15,7 @@ public class Debug {
     public static void log(Collection<ItemInfo> buyItems) {
         try (BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(Files.newOutputStream(file.toPath()), "UTF-8"))) {
             for (ItemInfo itemInfo: buyItems) {
-                writer.write("itemName: " + itemInfo.getName().replace("\n","") + " itemStack: " + itemInfo.getStack() + " itemPrise: " + itemInfo.getPrice());
+                writer.write("itemName: " + itemInfo.getName().replace("\n","") + " itemStack: " + itemInfo.getStack() + " itemPrise: " + itemInfo.getPrice() + " rarity: " + itemInfo.getRarity());
                 writer.newLine();
             }
         } catch (IOException e) {

@@ -4,6 +4,7 @@ public class BuyItems {
     private String itemName;
     private int minPrice;
     private int minStack;
+    private Rarity rarity;
 
     public BuyItems() {
 
@@ -14,29 +15,27 @@ public class BuyItems {
         this.minPrice = minPrice;
         this.minStack = minStack;
     }
+    public BuyItems(String itemName, int minPrice, int minStack,Rarity rarity) {
+        this.itemName = itemName;
+        this.minPrice = minPrice;
+        this.minStack = minStack;
+        this.rarity = rarity;
+    }
 
     public String getItemName() {
         return itemName;
-    }
-
-    public void setItemName(String itemName) {
-        this.itemName = itemName;
     }
 
     public int getMinPrice() {
         return minPrice;
     }
 
-    public void setMinPrice(int minPrice) {
-        this.minPrice = minPrice;
-    }
-
     public int getMinStack() {
         return minStack;
     }
 
-    public void setMinStack(int minStack) {
-        this.minStack = minStack;
+    public Rarity getRarity() {
+        return rarity;
     }
 
     @Override
@@ -45,6 +44,7 @@ public class BuyItems {
                 "itemName='" + itemName + '\'' +
                 ", minPrice=" + minPrice +
                 ", minStack=" + minStack +
+                ", rarity=" + rarity +
                 '}';
     }
 }

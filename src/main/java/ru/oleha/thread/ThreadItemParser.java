@@ -3,10 +3,14 @@ package ru.oleha.thread;
 import net.sourceforge.tess4j.Tesseract;
 import ru.oleha.main;
 import ru.oleha.utils.ItemInfo;
+import ru.oleha.utils.Rarity;
 import ru.oleha.utils.Utils;
 
+import javax.imageio.ImageIO;
+import javax.rmi.CORBA.Util;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.File;
 import java.util.concurrent.CountDownLatch;
 
 public class ThreadItemParser extends Thread {
@@ -36,10 +40,11 @@ public class ThreadItemParser extends Thread {
             int itemStack = Utils.getStack(tesseractItemStack.doOCR(imgItemStack));
             String itemName = tesseractItemName.doOCR(imgItemName);
             int itemPrice = Utils.getPrice(tesseractItemPrice.doOCR(imgItemPrice));
+            Rarity rarity = Utils.calcAvgNameColor(imgItemName);
             Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
             int x = (int)(screen.getWidth() / 2) - imgItemPrice.getTileGridXOffset();
             int y = (int)(screen.getHeight() / 2) - imgItemPrice.getTileGridYOffset();
-            main.itemInfos.add(new ItemInfo(itemName,itemPrice,itemStack,x, y - 115,image));
+            main.itemInfos.add(new ItemInfo(itemName,itemPrice,itemStack,rarity, x, y - 115,image));
         } catch (Exception e) {
             e.fillInStackTrace();
             throw new RuntimeException(e);

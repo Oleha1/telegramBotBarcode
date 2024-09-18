@@ -6,14 +6,16 @@ public class ItemInfo {
     private final String name;
     private final int price;
     private final int stack;
+    private final Rarity rarity;
     private final int x;
     private final int y;
     private final BufferedImage image;
 
-    public ItemInfo(String name, int price, int stack, int x, int y, BufferedImage image) {
+    public ItemInfo(String name, int price, int stack,Rarity rarity, int x, int y, BufferedImage image) {
         this.name = name;
         this.price = price;
         this.stack = stack;
+        this.rarity = rarity;
         this.x = x;
         this.y = y;
         this.image = image;
@@ -29,6 +31,9 @@ public class ItemInfo {
 
     public int getStack() {
         return stack;
+    }
+    public Rarity getRarity() {
+        return rarity;
     }
 
     public int getX() {

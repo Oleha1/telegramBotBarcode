@@ -29,7 +29,7 @@ public class ConfigBuyItems {
                     Type type = new TypeToken<ArrayList<BuyItems>>(){}.getType();
                     ArrayList<BuyItems> buyItemsMap = gson.fromJson(reader,type);
                     if (buyItemsMap == null) {
-                              System.err.println("Файл конфигурации '" + jsonName + "' пуст или содержит некорректные данные.");
+                        System.err.println("Файл конфигурации '" + jsonName + "' пуст или содержит некорректные данные.");
                     } else {
                         Storage.getBuyItems().addAll(buyItemsMap);
                     }
@@ -43,34 +43,6 @@ public class ConfigBuyItems {
     }
     public static int size() {
         return read().size();
-    }
-//    public static void addBuyItem(BuyItems buyItems) {
-//        ArrayList<BuyItems> buyItemsMap = read();
-//        buyItemsMap.add(buyItems);
-//        write(buyItemsMap);
-//    }
-//    public static void removeBuyItem(String itemName) {
-//        ArrayList<BuyItems> buyItemsMap = read();
-//        Iterator<BuyItems> iterator = buyItemsMap.iterator();
-//        while (iterator.hasNext()) {
-//            BuyItems entry = iterator.next();
-//            if (Objects.equals(entry.getItemName(), itemName)) {
-//                iterator.remove();
-//                break;
-//            }
-//        }
-//        write(buyItemsMap);
-//    }
-    public static String getConfig() {
-        String result = "";
-        try (Reader reader = new FileReader(file)) {
-            Gson gson = new Gson();
-            Type mapType = new TypeToken<ArrayList<BuyItems>>() {}.getType();
-            result = gson.fromJson(reader, mapType).toString();
-        } catch (IOException e) {
-            System.err.println("Ошибка чтения файла JSON: " + e.getMessage());
-        }
-        return result;
     }
     private static ArrayList<BuyItems> read() {
         ArrayList<BuyItems> craftDataMap = new ArrayList<>();

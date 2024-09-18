@@ -16,7 +16,12 @@ public class Logs {
     private static final File file = new File("./" + jsonName);
     public static void log(String text, ItemInfo itemInfo) {
         String daysAndTime = String.format("[%s : %s]", LocalDateTime.now().format(DAYS),LocalDateTime.now().format(TIME));
-        String finalText = String.format("%s %s '%s' за '%s' в количестве '%s'",daysAndTime,text, itemInfo.getName().replace("\n",""),itemInfo.getPrice(),itemInfo.getStack());
+        String finalText;
+        if (itemInfo.getRarity() != null) {
+            finalText = String.format("%s %s '%s' в качестве '%s' за '%s' в количестве '%s'",daysAndTime,text, itemInfo.getName().replace("\n",""),itemInfo.getRarity().getRusName(), itemInfo.getPrice(),itemInfo.getStack());
+        } else {
+            finalText = String.format("%s %s '%s' за '%s' в количестве '%s'",daysAndTime,text, itemInfo.getName().replace("\n",""),itemInfo.getPrice(),itemInfo.getStack());
+        }
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
             writer.write(finalText);
             writer.newLine();

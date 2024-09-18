@@ -33,6 +33,9 @@ public class ThreadDiscordLogs extends Thread {
             embedObject.addField("Название:", name, false);
             embedObject.addField("Цена:", String.valueOf(price), false);
             embedObject.addField("Количество:", String.valueOf(stack), false);
+            if (itemInfo.getRarity() != null) {
+                embedObject.addField("Качество:", itemInfo.getRarity().getRusName(), false);
+            }
             String daysAndTime = String.format("[%s : %s]", LocalDateTime.now().format(DAYS), LocalDateTime.now().format(TIME));
             embedObject.addField("Время:", daysAndTime, false);
             DiscordWebhook discordWebhook = new DiscordWebhook(webHook);

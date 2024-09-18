@@ -159,7 +159,7 @@ public class main extends Application implements NativeKeyListener {
         ClickMouse((int) (screen.getWidth() / 4), (int) (screen.getHeight() / 2),true);
         long timeNew;
         long time;
-        if (!Utils.isGuiOpen()) {
+        if (!Utils.isGuiOpenAuction()) {
             if (Utils.isSocketException()) {
                 closeGui();
                 Thread.sleep(500);
@@ -230,13 +230,16 @@ public class main extends Application implements NativeKeyListener {
         itemInfos.clear();
         Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
         ClickMouse((int) (screen.getWidth() / 4), (int) (screen.getHeight() / 2), true);
-        if (!Utils.isGuiOpen()) {
+        if (!Utils.isGuiOpenAuction()) {
             if (Utils.isSocketException()) {
                 DiscordWebhook discordWebhook = setupDiscordWebhook("Бот поймал Socket Exception и закрыл его!",new Color(0xFF00FF));
                 discordWebhook.execute();
                 closeGui();
                 Thread.sleep(500);
+            }
+            if (Utils.isGuiMainMenu()) {
                 ClickMouse(900,900,true);
+                Thread.sleep(500);
             }
             boolean isInGame = Utils.isInGame();
             while (!isInGame) {
@@ -256,18 +259,15 @@ public class main extends Application implements NativeKeyListener {
             }
             countDownLatch.await();
             ArrayList<BuyItems> buyItemsArrayList = Storage.getBuyItems();
-//                ItemInfo itemInfoBest = null;
-//                int bestPrice = 0;
             mark:
             for (ItemInfo itemInfo : itemInfos) {
                 for (BuyItems buyItems : buyItemsArrayList) {
                     if (itemInfo.getName().contains(buyItems.getItemName())) {
                         if (itemInfo.getPrice() > 0 && itemInfo.getStack() >= buyItems.getMinStack()) {
                             if (itemInfo.getPrice() <= (buyItems.getMinPrice() * itemInfo.getStack())) {
-//                                    int prePrice = (buyItems.getMinPrice() * itemInfo.getStack()) - itemInfo.getPrice();
-//                                    if (itemInfoBest == null || itemInfo.getPrice() - prePrice) {
-//                                        bestPrice = prePrice;
-//                                    }
+                                if (buyItems.getRarity() != null && itemInfo.getRarity() != buyItems.getRarity()) {
+                                    continue;
+                                }
                                 buyItem(itemInfo.getX(), itemInfo.getY(), itemInfo);
                                 itemInfos.clear();
                                 break mark;
@@ -363,7 +363,7 @@ public class main extends Application implements NativeKeyListener {
         clearLogs.setOnAction(event -> {
             try {
                 Path path = Paths.get("./logs.json");
-                Files.write(path,new byte[0]);
+                Files.delete(path);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
